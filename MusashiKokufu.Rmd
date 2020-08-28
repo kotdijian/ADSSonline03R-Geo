@@ -39,184 +39,16 @@ devtools::install_github('3wen/legendMap')
 
 library("rio")
 Kokufu.total <- import("https://github.com/kotdijian/ADSSonline03R-Geo/raw/master/SitRep_Musashi-Kokufu-total_geocoord.csv", setclass = "tbl_df", encoding = "UTF-8")
-Kokufu.jom <- import("sitrepdata/SitRep_Musashi-Kokufu-Jom_geocoord.csv", setclass = "tbl_df", encoding = "UTF-8")
-Kokufu.YK <- import("sitrepdata/SitRep_Musashi-Kokufu-YayKof_geocoord.csv", setclass = "tbl_df", encoding = "UTF-8")
-Kokufu.NH <- import("sitrepdata/SitRep_Musashi-Kokufu-NarHei_geocoord.csv", setclass = "tbl_df", encoding = "UTF-8")
+Kokufu.NH <- import("https://github.com/kotdijian/ADSSonline03R-Geo/raw/master/SitRep_Musashi-Kokufu-NarHei_geocoord.csv", setclass = "tbl_df", encoding = "UTF-8")
 
 Kokufu.total[is.na(Kokufu.total)] <- 0
-Kokufu.jom[is.na(Kokufu.jom)] <- 0
-Kokufu.YK[is.na(Kokufu.YK)] <-0
 Kokufu.NH[is.na(Kokufu.NH)] <-0
 ```
 
-```{r}
-library("tidyverse")
-Kokufu.jom.vl <- Kokufu.jom %>% 
-  filter(集落 == 1) %>% 
-  tally() %>% 
-  rename(集落 = n)
-Kokufu.jom.dp <- Kokufu.jom %>% 
-    filter(住居 == 1) %>% 
-    tally() %>% 
-    rename(住居 = n)
-Kokufu.jom.pf <- Kokufu.jom %>% 
-    filter(落とし穴 == 1) %>% 
-    tally() %>% 
-    rename(落とし穴 = n)
-Kokufu.jom.sh <- Kokufu.jom %>% 
-    filter(集石 == 1) %>% 
-    tally() %>% 
-    rename(集石 = n)
-Kokufu.jom.bp <- Kokufu.jom %>% 
-    filter(埋設土器 == 1) %>% 
-    tally() %>% 
-    rename(埋設土器 = n)
-Kokufu.jom.st <- bind_cols(Kokufu.jom.vl, Kokufu.jom.dp, Kokufu.jom.pf, Kokufu.jom.sh, Kokufu.jom.bp)
-Kokufu.jom.st
 
-```
+**奈良・平安時代調査地点の遺構種別検出数の集計**
 
-```{r}
-library(ggmap)
-library(ggspatial)
-library(legendMap)
-local_map <- ggmap(get_stamenmap(rbind(as.numeric(c(139.44, 35.65,
-                                                    139.53, 35.7))), zoom = 15)) #local_mpa=国府関連全域+国分寺
-
-cols    <- c( "c1" = "#0000ff", "c2" = "#00ff00", "c3" = "#ffff00", "c4" = "#ffa500", "c5" = "#ff0000")
-
-site_Kokufu <- 
-  local_map +
-  geom_point(data = Kokufu.jom,  
-             aes(x = lon,
-                 y = lat,
-                 color = "4_その他"),
-             size = 3) +
-  geom_point(data = Kokufu.jom %>%
-               filter(落とし穴 == 1),
-             aes(x = lon,
-                 y = lat,
-                 color = "3_落とし穴"),
-             size = 4) +
-  geom_point(data = Kokufu.jom %>%
-               filter(集石 == 1),
-             aes(x = lon,
-                 y = lat,
-                 color = "2_集石"),
-             size = 4) +
-  geom_point(data = Kokufu.jom %>%
-               filter(埋設土器 == 1),
-             aes(x = lon,
-                 y = lat,
-                 color = "1_埋設土器"),
-             size = 4) +
-  geom_point(data = Kokufu.jom %>%
-               filter(集落 == 1),
-             aes(x = lon,
-                 y = lat,
-                 color = "0_住居"),
-             size = 6) +
-  coord_sf(xlim = c(139.44, 139.53),
-           ylim = c(35.65, 35.7),
-           expand = FALSE) +
-  labs(title = "東京都府中市内縄文遺跡分布図",
-       subtitle = "全時期：検出遺構種別",
-       x = "経度",
-       y = "緯度",
-       color = "検出遺構") +
-  scale_x_continuous(breaks = seq(139.44, 139.52, by = 0.02)) + 
-  scale_y_continuous(breaks = seq(35.65, 35.7, by = 0.02)) +
-  legendMap::scale_bar( 
-    lon = 139.515,
-    lat = 35.685,
-    legend_size = 3,
-    distance_lon = 0.5,
-    distance_lat = 0.1,
-    distance_legend = 0.3,
-    dist_unit = "km",
-    orientation = TRUE,
-    arrow_length = 1,
-    arrow_distance = 0.5,
-    arrow_north_size = 2)
-
-site_Kokufu
-```
-
-```{r}
-site_Kokufu <- 
-  local_map +
-  geom_point(data = Kokufu.YK,  
-             aes(x = lon,
-                 y = lat),
-             size = 2,
-             color = "green") +
-  geom_point(data = Kokufu.YK %>%
-               filter(弥生 == 1),
-             aes(x = lon,
-                 y = lat),
-             size = 2,
-             color = "orange") +
-    coord_sf(xlim = c(139.44, 139.53),
-           ylim = c(35.65, 35.7),
-           expand = FALSE) +
-  scale_x_continuous(breaks = seq(139.44, 139.52, by = 0.02)) + 
-  scale_y_continuous(breaks = seq(35.65, 35.7, by = 0.02)) +
-  legendMap::scale_bar( 
-    lon = 139.515,
-    lat = 35.685,
-    legend_size = 3,
-    distance_lon = 0.5,
-    distance_lat = 0.1,
-    distance_legend = 0.3,
-    dist_unit = "km",
-    orientation = TRUE,
-    arrow_length = 1,
-    arrow_distance = 0.5,
-    arrow_north_size = 2) +
-  theme(axis.title.x = element_blank(),
-        axis.title.y = element_blank())
-
-site_Kokufu
-```
-
-```{r}
-site_Kokufu <- 
-  local_map +
-  geom_point(data = Kokufu.YK,  
-             aes(x = lon,
-                 y = lat),
-             size = 1,
-             color = "green") +
-  geom_point(data = Kokufu.YK %>%
-               filter(古墳住居 == 1),
-             aes(x = lon,
-                 y = lat),
-             size = 3,
-             color = "green") +
-    coord_sf(xlim = c(139.44, 139.53),
-           ylim = c(35.65, 35.7),
-           expand = FALSE) +
-  scale_x_continuous(breaks = seq(139.44, 139.52, by = 0.02)) + 
-  scale_y_continuous(breaks = seq(35.65, 35.7, by = 0.02)) +
-  legendMap::scale_bar( 
-    lon = 139.515,
-    lat = 35.685,
-    legend_size = 3,
-    distance_lon = 0.5,
-    distance_lat = 0.1,
-    distance_legend = 0.3,
-    dist_unit = "km",
-    orientation = TRUE,
-    arrow_length = 1,
-    arrow_distance = 0.5,
-    arrow_north_size = 2) +
-  theme(axis.title.x = element_blank(),
-        axis.title.y = element_blank())
-
-site_Kokufu
-```
-
-```{r}
+```{r echo=FALSE include=FALSE}
 Kokufu.NH.dp <- Kokufu.NH %>%
     filter(住居 != 0) %>% 
     summarise(地点数 = n(), 検出数 = sum(住居)) %>% 
@@ -238,8 +70,14 @@ Kokufu.NH.st <- dplyr::select(Kokufu.NH.st, 遺構, 地点数, 検出数)
 Kokufu.NH.st
 
 ```
+**遺構種別の検出地点の描画**
+```{r echo=FALSE include=FALSE}
+library(ggmap)
+library(ggspatial)
+library(legendMap)
+local_map <- ggmap(get_stamenmap(rbind(as.numeric(c(139.44, 35.65,
+                                                    139.53, 35.7))), zoom = 15)) #local_map=国府関連全域+国分寺
 
-```{r}
 site_Kokufu <- 
   local_map +
   geom_point(data = Kokufu.NH,  
@@ -289,7 +127,10 @@ site_Kokufu <-
 site_Kokufu
 ```
 
-```{r}
+**竪穴建物(住居)の検出数のバブルチャート表示**
+未検出地点は黄色で描画しています。
+
+```{r echo=FALSE include=FALSE}
 local_map2 <- ggmap(get_stamenmap(rbind(as.numeric(c(139.45, 35.66,
                                                     139.51, 35.685))), zoom = 15)) #local_map2=国府主要域
 
@@ -330,8 +171,10 @@ site_Kokufu <-
 
 site_Kokufu
 ```
+**掘立柱建物の検出数のバブルチャート表示**
+未検出地点は黄色で描画しています。
 
-```{r}
+```{r echo=FALSE include=FALSE}
 site_Kokufu <- 
   local_map2 +
   geom_point(data = Kokufu.NH,  
@@ -368,8 +211,10 @@ site_Kokufu <-
 
 site_Kokufu
 ```
+**竪穴建物(住居)と掘立柱建物の検出数の重ね合わせ表示**
+未検出地点は黄色で描画しています。
 
-```{r}
+```{r echo=FALSE include=FALSE}
 site_Kokufu <- 
   local_map2 +
   geom_point(data = Kokufu.NH,  
@@ -419,7 +264,10 @@ site_Kokufu <-
 site_Kokufu
 ```
 
-```{r}
+**竪穴建物(住居)の検出密度(=調査面積あたり検出数)のバブルチャート表示**
+未検出地点は黄色で描画しています。
+
+```{r echo=FALSE include=FALSE}
 site_Kokufu <- 
   local_map2 +
   geom_point(data = Kokufu.NH,  
@@ -457,7 +305,11 @@ site_Kokufu <-
 site_Kokufu
 ```
 
-```{r}
+**竪穴建物(住居)の検出密度(=調査面積あたり検出数)のバブルチャート表示**
+未検出地点は黄色で描画しています。
+
+```{r echo=FALSE include=FALSE}
+
 site_Kokufu <- 
   local_map2 +
   geom_point(data = Kokufu.NH,  
@@ -495,7 +347,11 @@ site_Kokufu <-
 site_Kokufu
 ```
 
-```{r}
+**竪穴建物(住居)と掘立柱建物の検出密度の重ね合わせ表示**
+未検出地点は黄色で描画しています。
+
+```{r echo=FALSE include=FALSE}
+
 site_Kokufu <- 
   local_map2 +
   geom_point(data = Kokufu.NH,  
@@ -545,7 +401,9 @@ site_Kokufu <-
 site_Kokufu
 ```
 
-```{r}
+**調査年代-調査面積地図**
+```{r echo=FALSE include=FALSE}
+
 Kokufu.total <- mutate(Kokufu.total, 調査年代 = floor(Kokufu.total$調査期間1/10) * 10, 調査面積 = floor(log10(Kokufu.total$調査面積2)) * 10)
 Kokufu.total <- filter(Kokufu.total, 調査年代 != 0)
 
@@ -583,7 +441,8 @@ site_Kokufu <-
 site_Kokufu
 ```
 
-```{r}
+**調査年代-調査面積のクロス集計**
+```{r echo=FALSE include=FALSE}
 Kokufu.excav <- Kokufu.total %>% 
   group_by(調査年代) %>% 
   tally()
@@ -598,30 +457,8 @@ Kokufu.excav <- Kokufu.excav %>%
 Kokufu.excav
 ```
 
-
-```{r}
-Kokufu.total <- Kokufu.total %>% 
-  mutate(調査年代2 = (調査期間1 - (floor(調査期間1/10)*10)))
-Kokufu.exst2 <- Kokufu.total %>% 
-  group_by(調査年代, 調査年代2) %>% 
-  tally() %>% 
-  spread(調査年代2,n)
-Kokufu.exst2[is.na(Kokufu.exst2)] <- 0
-Kokufu.exst2
-```
-
-```{r}
-Kokufu.total <- Kokufu.total %>% 
-  mutate(調査年代2 = (調査期間1 - (floor(調査期間1/10)*10)))
-Kokufu.exst2 <- Kokufu.total %>% 
-  group_by(調査年代, 調査年代2) %>% 
-  tally() %>% 
-  spread(調査年代2,n)
-Kokufu.exst2[is.na(Kokufu.exst2)] <- 0
-Kokufu.exst2
-```
-
-```{r}
+**調査地点所在地(町名区分ごと)の調査年代-調査件数**
+```{r echo=FALSE include=FALSE}
 Kokufu.exst3 <- Kokufu.total %>% 
   group_by(所在地2,調査年代) %>% 
   tally() %>% 
@@ -630,8 +467,8 @@ Kokufu.exst3[is.na(Kokufu.exst3)] <- 0
 Kokufu.exst3
 ```
 
-
-```{r}
+**調査年代別調査面積のボックスプロット**
+```{r echo=FALSE include=FALSE}
 ggplot(Kokufu.total) +  
        aes(group = 調査年代,  
            x = 調査年代,
@@ -644,7 +481,8 @@ ggplot(Kokufu.total) +
   theme_bw(base_size = 20)
 ```
 
-```{r}
+**調査年代-調査面積のヴァイオリンプロット**
+```{r echo=FALSE include=FALSE}
 ggplot(Kokufu.total) +  
        aes(group = 調査年代,  
            x = 調査年代,
